@@ -10,26 +10,49 @@ A Deno application that automatically deploys repositories using Docker Compose 
 
 ## Setup
 
-1. Configure your repositories in `config.ts`:
+1. Configure your repositories in `config.ts`. You only need to specify the trigger type, all other fields are optional with smart defaults:
+
    ```typescript
+   import { RepoConfig, getDefaultConfig } from "./repoUtils.ts";
+
    {
      repositories: new Map([
-       ["your-repo-name", {
-         name: "your-repo-name",
-         url: "https://github.com/user/repo",
-         branch: "main",
-         dockerComposePath: "./docker-compose.yml",
-         triggerOn: "release",  // or "push"
-         webhookSecret: Deno.env.get("WEBHOOK_SECRET_YOUR_REPO") || "your-secret"
+       // Minimal config - just specify trigger type
+       // Will use saphitv as the default owner
+       ["my-app", { 
+         triggerOn: "push"  // or "release"
+       }],
+
+       // Override default owner
+       ["backend-api", {
+         owner: "different-org",
+         triggerOn: "release"
+       }],
+
+       // Full custom config when needed
+       ["custom-app", {
+         url: "git@github.com:another-org/different-name.git",
+         branch: "develop",
+         dockerComposePath: "./compose.yml",
+         webhookSecret: "custom-secret",
+         triggerOn: "push"
        }]
      ])
    }
    ```
 
-2. Set environment variables for each repository's webhook secret:
+   ### Default Values
+   - `name`: Same as the key in the Map
+   - `owner`: "saphitv" (can be overridden with `owner` field)
+   - `url`: `https://github.com/{owner}/{name}`
+   - `branch`: "main"
+   - `dockerComposePath`: "./docker-compose.yaml"
+   - `webhookSecret`: Environment variable `WEBHOOK_SECRET_{REPO_NAME_UPPERCASE}`
+
+2. Set environment variables for webhook secrets (one per repository):
    ```bash
-   export WEBHOOK_SECRET_YOUR_REPO="your-secret-here"
-   export WEBHOOK_SECRET_ANOTHER_REPO="another-secret-here"
+   export WEBHOOK_SECRET_MY_APP="secret123"
+   export WEBHOOK_SECRET_BACKEND_API="secret456"
    ```
 
 3. Create a `repositories` directory in the project root:
@@ -50,18 +73,19 @@ deno run --allow-net --allow-run --allow-read --allow-env server.ts
 3. Add webhook:
    - Payload URL: `http://your-server:8000`
    - Content type: `application/json`
-   - Secret: Use the webhook secret configured for this specific repository
-   - Events: Select "Push" or "Releases" events based on your configuration
+   - Secret: Use the corresponding `WEBHOOK_SECRET_{REPO_NAME_UPPERCASE}` value
+   - Events: Select based on your `triggerOn` configuration:
+     - "Releases" if configured with `triggerOn: "release"`
+     - "Pushes" if configured with `triggerOn: "push"`
 
 ## How it Works
 
 1. When a webhook is received, the server:
    - Identifies the repository from the payload
-   - Verifies the webhook signature using that repository's specific secret
+   - Verifies the webhook signature using the repository's secret
    - Checks if the event type matches the repository's trigger configuration
 2. If valid, it pulls the latest code from the repository
 3. Deployment process:
    - Builds new images
    - Takes down existing services
    - Brings up new services with the updated code
-4. Multiple repositories can be deployed independently with their own configurations and secrets

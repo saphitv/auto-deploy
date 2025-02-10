@@ -37,10 +37,20 @@ export class RepoManager {
     const repo = config.repositories.get(repoName);
     if (!repo) throw new Error(`Repository ${repoName} not found`);
 
-    await this.runCommand(
-      ["git", "pull", "origin", repo.branch],
-      `./repositories/${repo.name}`
-    );
+    const repoPath = `./repositories/${repo.name}`;
+    
+    // Make sure we're on the right branch
+    try {
+      await this.runCommand(["git", "checkout", repo.branch], repoPath);
+    } catch (_error) {
+      // If branch doesn't exist locally, create it tracking the remote
+      await this.runCommand(
+        ["git", "checkout", "-b", repo.branch, `origin/${repo.branch}`],
+        repoPath
+      );
+    }
+
+    await this.runCommand(["git", "pull", "origin", repo.branch], repoPath);
   }
 
   isDeploying(repoName: string): boolean {

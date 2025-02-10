@@ -1,6 +1,7 @@
 import { config } from "./config.ts";
 import { RepoManager } from "./repoManager.ts";
 import { Webhooks } from "npm:@octokit/webhooks";
+import { ConfigValidator } from "./configValidator.ts";
 
 const repoManager = new RepoManager();
 
@@ -12,6 +13,28 @@ async function verifyWebhookSignature(payload: string, signature: string, secret
   } catch {
     return false;
   }
+}
+
+async function validateConfig(): Promise<boolean> {
+  console.log("Validating repository configurations...");
+  const validator = new ConfigValidator();
+  const results = await validator.validateAll();
+  
+  let isValid = true;
+  
+  for (const result of results) {
+    if (!result.isValid) {
+      isValid = false;
+      console.error(`❌ Configuration invalid for ${result.repoName}:`);
+      for (const error of result.errors) {
+        console.error(`   - ${error}`);
+      }
+    } else {
+      console.log(`✅ Configuration valid for ${result.repoName}`);
+    }
+  }
+  
+  return isValid;
 }
 
 async function handleWebhook(request: Request): Promise<Response> {
@@ -72,5 +95,14 @@ async function handleWebhook(request: Request): Promise<Response> {
 
 // Start the server
 const port = 3000;
-console.log(`Starting webhook server on port ${port}...`);
+console.log("Starting auto-deploy server...");
+
+// Validate configuration before starting
+const configValid = await validateConfig();
+if (!configValid) {
+  console.error("Server startup failed: Invalid configuration detected");
+  Deno.exit(1);
+}
+
+console.log(`Configuration valid, starting webhook server on port ${port}...`);
 await Deno.serve({ port }, handleWebhook);
