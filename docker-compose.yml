@@ -1,5 +1,6 @@
 services:
   auto-deploy:
+    container_name: auto_deploy
     build: 
       context: .
       dockerfile: Dockerfile
