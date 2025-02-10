@@ -49,7 +49,7 @@ A Deno application that automatically deploys repositories using Docker Compose 
    - `dockerComposePath`: "./docker-compose.yaml"
    - `webhookSecret`: Environment variable `WEBHOOK_SECRET_{REPO_NAME_UPPERCASE}`
 
-2. Set environment variables for webhook secrets (one per repository):
+2. Set environment variables (`.env` file) for webhook secrets (one per repository):
    ```bash
    export WEBHOOK_SECRET_MY_APP="secret123"
    export WEBHOOK_SECRET_BACKEND_API="secret456"
