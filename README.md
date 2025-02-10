@@ -4,11 +4,30 @@ A Deno application that automatically deploys repositories using Docker Compose 
 
 ## Prerequisites
 
+- Docker and Docker Compose
+
+## Running with Docker Compose
+
+1. Create a `.env` file with your webhook secrets:
+   ```bash
+   WEBHOOK_SECRET_MY_APP=secret123
+   WEBHOOK_SECRET_BACKEND_API=secret456
+   ```
+
+2. Start the server:
+   ```bash
+   docker compose up -d
+   ```
+
+   The server will be available on port 8000.
+
+## Local Development Prerequisites
+
 - Deno
 - Docker and Docker Compose
 - Git
 
-## Setup
+## Local Development Setup
 
 1. Configure your repositories in `config.ts`. You only need to specify the trigger type, all other fields are optional with smart defaults:
 
@@ -60,8 +79,6 @@ A Deno application that automatically deploys repositories using Docker Compose 
 ```bash
 deno run --allow-net --allow-run --allow-read --allow-env server.ts
 ```
-
-
 
 ## GitHub Webhook Configuration
 

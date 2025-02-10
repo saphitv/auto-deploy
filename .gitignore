@@ -1,2 +1,16 @@
+# Environment variables
 .env
-repositories/*
+
+# Repository clones
+repositories/
+
+# Deno
+.deno/
+
+# IDE
+.vscode/
+.idea/
+
+# OS specific
+.DS_Store
+Thumbs.db

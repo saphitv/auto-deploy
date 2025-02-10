@@ -1,17 +1,21 @@
-version: '3.8'
-
 services:
   auto-deploy:
     build: 
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8000:8000"
+      - "8000:3000"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./repositories:/app/repositories
+    environment:
+      - DOCKER_HOST=unix:///var/run/docker.sock
     env_file:
       - .env
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "/healthcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
     restart: unless-stopped

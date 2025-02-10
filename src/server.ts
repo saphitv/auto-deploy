@@ -37,6 +37,46 @@ async function validateConfig(): Promise<boolean> {
   return isValid;
 }
 
+async function checkHealth(): Promise<{ isHealthy: boolean; details: Record<string, boolean> }> {
+  const details: Record<string, boolean> = {};
+  
+  // Check Docker access
+  try {
+    const process = new Deno.Command("docker", {
+      args: ["version"],
+    });
+    const { success } = await process.output();
+    details.docker = success;
+  } catch {
+    details.docker = false;
+  }
+
+  // Check Docker Compose access
+  try {
+    const process = new Deno.Command("docker", {
+      args: ["compose", "version"],
+    });
+    const { success } = await process.output();
+    details.dockerCompose = success;
+  } catch {
+    details.dockerCompose = false;
+  }
+
+  // Check Git access
+  try {
+    const process = new Deno.Command("git", {
+      args: ["--version"],
+    });
+    const { success } = await process.output();
+    details.git = success;
+  } catch {
+    details.git = false;
+  }
+
+  const isHealthy = Object.values(details).every(Boolean);
+  return { isHealthy, details };
+}
+
 async function handleWebhook(request: Request): Promise<Response> {
   if (request.method !== "POST") {
     console.log("Method not allowed");
@@ -93,8 +133,39 @@ async function handleWebhook(request: Request): Promise<Response> {
   }
 }
 
+async function handleRequest(request: Request): Promise<Response> {
+  try {
+    const url = new URL(request.url);
+    const path = url.pathname.replace(/\/$/, ''); // Remove trailing slash
+    
+    // Handle health checks
+    if (path === '/health') {
+      console.log(`Health check request received from ${request.headers.get("user-agent")}`);
+      const health = await checkHealth();
+      
+      return new Response(JSON.stringify({
+        status: health.isHealthy ? "healthy" : "unhealthy",
+        details: health.details,
+        timestamp: new Date().toISOString()
+      }), { 
+        status: health.isHealthy ? 200 : 503,
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-cache, no-store, must-revalidate"
+        }
+      });
+    }
+
+    // Handle webhooks
+    return handleWebhook(request);
+  } catch (error) {
+    console.error("Error processing request:", error);
+    return new Response("Internal server error", { status: 500 });
+  }
+}
+
 // Start the server
-const port = 3000;
+const port = 3000;  // This will be mapped to port 8000 in docker-compose
 console.log("Starting auto-deploy server...");
 
 // Validate configuration before starting
@@ -105,4 +176,4 @@ if (!configValid) {
 }
 
 console.log(`Configuration valid, starting webhook server on port ${port}...`);
-await Deno.serve({ port }, handleWebhook);
+await Deno.serve({ port }, handleRequest);
