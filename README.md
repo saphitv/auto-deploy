@@ -10,8 +10,28 @@ A Deno application that automatically deploys repositories using Docker Compose 
 
 ## Setup
 
-1. Configure your repositories in `config.ts`
-2. Set the `WEBHOOK_SECRET` environment variable or update it in the config
+1. Configure your repositories in `config.ts`:
+   ```typescript
+   {
+     repositories: new Map([
+       ["your-repo-name", {
+         name: "your-repo-name",
+         url: "https://github.com/user/repo",
+         branch: "main",
+         dockerComposePath: "./docker-compose.yml",
+         triggerOn: "release",  // or "push"
+         webhookSecret: Deno.env.get("WEBHOOK_SECRET_YOUR_REPO") || "your-secret"
+       }]
+     ])
+   }
+   ```
+
+2. Set environment variables for each repository's webhook secret:
+   ```bash
+   export WEBHOOK_SECRET_YOUR_REPO="your-secret-here"
+   export WEBHOOK_SECRET_ANOTHER_REPO="another-secret-here"
+   ```
+
 3. Create a `repositories` directory in the project root:
    ```bash
    mkdir repositories
@@ -30,14 +50,18 @@ deno run --allow-net --allow-run --allow-read --allow-env server.ts
 3. Add webhook:
    - Payload URL: `http://your-server:8000`
    - Content type: `application/json`
-   - Secret: Same as your `WEBHOOK_SECRET`
-   - Events: Select "Push" events
+   - Secret: Use the webhook secret configured for this specific repository
+   - Events: Select "Push" or "Releases" events based on your configuration
 
 ## How it Works
 
-1. When a push event is received, the server verifies the webhook signature
+1. When a webhook is received, the server:
+   - Identifies the repository from the payload
+   - Verifies the webhook signature using that repository's specific secret
+   - Checks if the event type matches the repository's trigger configuration
 2. If valid, it pulls the latest code from the repository
-3. It manages two versions of each service:
-   - Brings down the currently active version if it exists
-   - Deploys the new version using Docker Compose
-4. Alternates between two states to ensure zero-downtime deployments
+3. Deployment process:
+   - Builds new images
+   - Takes down existing services
+   - Brings up new services with the updated code
+4. Multiple repositories can be deployed independently with their own configurations and secrets

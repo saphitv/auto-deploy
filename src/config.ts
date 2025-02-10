@@ -4,17 +4,18 @@ interface RepoConfig {
   branch: string;
   dockerComposePath: string;
   triggerOn: "push" | "release";
+  webhookSecret: string;  // Add webhook secret per repository
 }
 
 export const config = {
-  webhookSecret: Deno.env.get("WEBHOOK_SECRET") || "your-webhook-secret",
   repositories: new Map<string, RepoConfig>([
     ["docker-hello-world", {
       name: "docker-hello-world",
       url: "https://github.com/saphitv/docker-hello-world",
       branch: "master",
       dockerComposePath: "./docker-compose.yaml",
-      triggerOn: "release"
+      triggerOn: "release",
+      webhookSecret: Deno.env.get("WEBHOOK_SECRET_DOCKER_HELLO_WORLD") || "your-webhook-secret"
     }]
   ])
 };

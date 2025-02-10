@@ -3,9 +3,16 @@ import { RepoManager } from "./repoManager.ts";
 import { Webhooks } from "npm:@octokit/webhooks";
 
 const repoManager = new RepoManager();
-const webhooks = new Webhooks({
-  secret: config.webhookSecret,
-});
+
+async function verifyWebhookSignature(payload: string, signature: string, secret: string): Promise<boolean> {
+  const webhooks = new Webhooks({ secret });
+  try {
+    await webhooks.verify(payload, signature);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 async function handleWebhook(request: Request): Promise<Response> {
   if (request.method !== "POST") {
@@ -21,14 +28,8 @@ async function handleWebhook(request: Request): Promise<Response> {
     }
 
     const bodyText = await request.text();
-    if (!await webhooks.verify(bodyText, signature)) {
-      console.log("Invalid signature");
-      return new Response("Invalid signature", { status: 401 });
-    }
-
     const payload = JSON.parse(bodyText);
     const repoName = payload.repository?.name;
-    const eventType = request.headers.get("x-github-event");
 
     if (!repoName || !config.repositories.has(repoName)) {
       console.log("Repository not configured");
@@ -36,6 +37,14 @@ async function handleWebhook(request: Request): Promise<Response> {
     }
 
     const repo = config.repositories.get(repoName)!;
+
+    // Verify signature with repository-specific secret
+    if (!await verifyWebhookSignature(bodyText, signature, repo.webhookSecret)) {
+      console.log("Invalid signature");
+      return new Response("Invalid signature", { status: 401 });
+    }
+
+    const eventType = request.headers.get("x-github-event");
 
     // Check if deployment is already in progress
     if (repoManager.isDeploying(repoName)) {
