@@ -10,6 +10,7 @@ export interface ValidationResult {
 interface SystemCheckResult {
   docker: boolean;
   dockerCompose: boolean;
+  ssh: boolean;
   errors: string[];
 }
 
@@ -18,6 +19,7 @@ export class ConfigValidator {
     const errors: string[] = [];
     let docker = false;
     let dockerCompose = false;
+    let ssh = false;
 
     try {
       const process = new Deno.Command("docker", {
@@ -45,7 +47,22 @@ export class ConfigValidator {
       errors.push("Docker Compose plugin is not installed");
     }
 
-    return { docker, dockerCompose, errors };
+    // Check SSH and GitHub connectivity
+    try {
+      const process = new Deno.Command("ssh", {
+        args: ["-T", "git@github.com"],
+      });
+      const { code } = await process.output();
+      // GitHub returns 1 for successful auth
+      ssh = code === 1;
+      if (!ssh) {
+        errors.push("SSH connection to GitHub failed. Check your SSH key configuration.");
+      }
+    } catch {
+      errors.push("SSH is not configured correctly. Make sure your SSH key is properly set up.");
+    }
+
+    return { docker, dockerCompose, ssh, errors };
   }
 
   async validateAll(): Promise<ValidationResult[]> {

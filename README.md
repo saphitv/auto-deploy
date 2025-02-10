@@ -6,6 +6,29 @@ A Deno application that automatically deploys repositories using Docker Compose 
 
 - Docker and Docker Compose
 
+## Private Repository Access
+
+1. Generate an SSH key if you don't have one:
+   ```bash
+   ssh-keygen -t ed25519 -C "your_email@example.com"
+   ```
+
+2. Add the public key to your GitHub account:
+   - Copy the content of `~/.ssh/id_ed25519.pub`
+   - Go to GitHub Settings -> SSH and GPG keys -> New SSH key
+   - Paste your public key and save
+
+3. When running with Docker Compose, specify your SSH key path in `.env`:
+   ```bash
+   SSH_KEY_PATH=/path/to/your/.ssh/id_ed25519
+   ```
+   If not specified, it will default to `~/.ssh/id_rsa`
+
+4. Make sure your SSH key has the correct permissions:
+   ```bash
+   chmod 600 ~/.ssh/id_ed25519
+   ```
+
 ## Running with Docker Compose
 
 1. Create a `.env` file with your webhook secrets:

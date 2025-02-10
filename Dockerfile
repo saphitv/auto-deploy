@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y \
     gnupg \
     lsb-release \
     git \
+    openssh-client \
     && curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg \
     && echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list \
     && apt-get update \
@@ -16,9 +17,13 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-# Copy and setup healthcheck script
+# Create SSH directory and set permissions
+RUN mkdir -p /root/.ssh && chmod 700 /root/.ssh
+
+# Copy and setup scripts
 COPY healthcheck.sh /healthcheck.sh
-RUN chmod +x /healthcheck.sh
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /healthcheck.sh /docker-entrypoint.sh
 
 # Cache the dependencies
 COPY src/deps.ts* .
@@ -33,4 +38,8 @@ RUN mkdir -p repositories
 # Cache the application
 RUN deno cache src/server.ts
 
+# Add Github to known hosts
+RUN ssh-keyscan github.com >> /root/.ssh/known_hosts
+
+ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["deno", "run", "--allow-net", "--allow-run", "--allow-read", "--allow-env", "src/server.ts"]
