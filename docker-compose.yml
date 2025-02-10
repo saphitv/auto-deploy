@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  auto-deploy:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./repositories:/app/repositories
+    environment:
+      - WEBHOOK_SECRET=${WEBHOOK_SECRET:-your-webhook-secret}
+      - DOCKER_HOST=tcp://host.docker.internal:2375
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped

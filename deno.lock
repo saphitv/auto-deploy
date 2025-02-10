@@ -1,0 +1,61 @@
+{
+  "version": "4",
+  "specifiers": {
+    "jsr:@std/assert@1": "1.0.11",
+    "jsr:@std/internal@^1.0.5": "1.0.5",
+    "npm:@octokit/webhooks@*": "13.6.0",
+    "npm:@octokit/webhooks@^13.6.0": "13.6.0"
+  },
+  "jsr": {
+    "@std/assert@1.0.11": {
+      "integrity": "2461ef3c368fe88bc60e186e7744a93112f16fd110022e113a0849e94d1c83c1",
+      "dependencies": [
+        "jsr:@std/internal"
+      ]
+    },
+    "@std/internal@1.0.5": {
+      "integrity": "54a546004f769c1ac9e025abd15a76b6671ddc9687e2313b67376125650dc7ba"
+    }
+  },
+  "npm": {
+    "@octokit/openapi-types@23.0.1": {
+      "integrity": "sha512-izFjMJ1sir0jn0ldEKhZ7xegCTj/ObmEDlEfpFrx4k/JyZSMRHbO3/rBwgE7f3m2DHt+RrNGIVw4wSmwnm3t/g=="
+    },
+    "@octokit/openapi-webhooks-types@9.1.0": {
+      "integrity": "sha512-bO1D2jLdU8qEvqmbWjNxJzDYSFT4wesiYKIKP6f4LaM0XUGtn/0LBv/20hu9YqcnpdX38X5o/xANTMtIAqdwYw=="
+    },
+    "@octokit/request-error@6.1.6": {
+      "integrity": "sha512-pqnVKYo/at0NuOjinrgcQYpEbv4snvP3bKMRqHaD9kIsk9u1LCpb2smHZi8/qJfgeNqLo5hNW4Z7FezNdEo0xg==",
+      "dependencies": [
+        "@octokit/types"
+      ]
+    },
+    "@octokit/types@13.8.0": {
+      "integrity": "sha512-x7DjTIbEpEWXK99DMd01QfWy0hd5h4EN+Q7shkdKds3otGQP+oWE/y0A76i1OvH9fygo4ddvNf7ZvF0t78P98A==",
+      "dependencies": [
+        "@octokit/openapi-types"
+      ]
+    },
+    "@octokit/webhooks-methods@5.1.1": {
+      "integrity": "sha512-NGlEHZDseJTCj8TMMFehzwa9g7On4KJMPVHDSrHxCQumL6uSQR8wIkP/qesv52fXqV1BPf4pTxwtS31ldAt9Xg=="
+    },
+    "@octokit/webhooks@13.6.0": {
+      "integrity": "sha512-qoYP1g6ZP01m8LtKjC+NLuAqRbiVzS5VmnwoEYlrQr6TaLRtb5yAMxWCq5/AqfrUF2Wx6ZQ9IJ4mAFytEn7J9A==",
+      "dependencies": [
+        "@octokit/openapi-webhooks-types",
+        "@octokit/request-error",
+        "@octokit/webhooks-methods"
+      ]
+    }
+  },
+  "remote": {
+    "https://deno.land/std@0.201.0/async/delay.ts": "a6142eb44cdd856b645086af2b811b1fcce08ec06bb7d50969e6a872ee9b8659",
+    "https://deno.land/std@0.201.0/http/server.ts": "1b2403b3c544c0624ad23e8ca4e05877e65380d9e0d75d04957432d65c3d5f41"
+  },
+  "workspace": {
+    "dependencies": [
+      "jsr:@std/assert@1",
+      "npm:@octokit/webhooks@^13.6.0"
+    ]
+  }
+}
