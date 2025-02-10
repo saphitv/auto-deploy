@@ -9,8 +9,6 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./repositories:/app/repositories
       - ${SSH_KEY_PATH:-~/.ssh/id_rsa}:/root/.ssh/id_rsa:ro  # Mount SSH key
-    environment:
-      - DOCKER_HOST=unix:///var/run/docker.sock
     env_file:
       - .env
     healthcheck:
