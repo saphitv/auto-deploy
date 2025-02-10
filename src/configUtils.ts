@@ -34,7 +34,7 @@ export function getDefaultConfig(repoName: string, partialConfig: RepoConfig): R
     branch: "main",
     dockerComposePath: "./docker-compose.yaml",
     triggerOn: partialConfig.triggerOn,
-    webhookSecret: Deno.env.get(`WEBHOOK_SECRET_${repoName.toUpperCase()}`)!
+    webhookSecret: Deno.env.get(`WEBHOOK_SECRET_${repoName.toUpperCase().replaceAll("-", "_")}`)!
   };
 
   return {

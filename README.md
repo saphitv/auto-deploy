@@ -55,16 +55,13 @@ A Deno application that automatically deploys repositories using Docker Compose 
    export WEBHOOK_SECRET_BACKEND_API="secret456"
    ```
 
-3. Create a `repositories` directory in the project root:
-   ```bash
-   mkdir repositories
-   ```
-
 ## Running the Server
 
 ```bash
 deno run --allow-net --allow-run --allow-read --allow-env server.ts
 ```
+
+
 
 ## GitHub Webhook Configuration
 
