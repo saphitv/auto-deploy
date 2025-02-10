@@ -22,7 +22,7 @@ RUN mkdir -p /root/.ssh && chmod 700 /root/.ssh
 
 # Copy and setup scripts
 COPY healthcheck.sh /healthcheck.sh
-RUN chmod +x /healthcheck.sh /docker-entrypoint.sh
+RUN chmod +x /healthcheck.sh 
 
 # Cache the dependencies
 COPY src/deps.ts* .
