@@ -1,5 +1,8 @@
 FROM denoland/deno:latest
 
+# Instrall ssh-keyscan
+RUN apt-get update && apt-get install -y openssh-client
+
 WORKDIR /app
 
 # Create SSH directory and set permissions
