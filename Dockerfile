@@ -22,7 +22,6 @@ RUN mkdir -p /root/.ssh && chmod 700 /root/.ssh
 
 # Copy and setup scripts
 COPY healthcheck.sh /healthcheck.sh
-COPY docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /healthcheck.sh /docker-entrypoint.sh
 
 # Cache the dependencies
