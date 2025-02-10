@@ -40,5 +40,4 @@ RUN deno cache src/server.ts
 # Add Github to known hosts
 RUN ssh-keyscan github.com >> /root/.ssh/known_hosts
 
-ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["deno", "run", "--allow-net", "--allow-run", "--allow-read", "--allow-env", "src/server.ts"]
